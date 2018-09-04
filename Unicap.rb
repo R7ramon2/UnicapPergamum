@@ -1,6 +1,7 @@
 require 'net/http'
 require 'json'
 require 'pry'
+require 'nokogiri'
 
 class Unicap
     attr_accessor :url
@@ -16,7 +17,6 @@ class Unicap
 
         header = {"Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/php/login_usu.php?flag=index.php","Cookie" => @cookie}
         response = request("#{@url}/pergamum3/Pergamum/biblioteca_s/php/#{location}","","get",header)
-        binding.pry
     end
 
     def request(uri, data,method,header)
@@ -35,7 +35,7 @@ class Unicap
         else
             begin
                 if not defined?@http
-                    @http = Net::HTTP.new( url.host, url.port, "localhost", 8080)
+                    @http = Net::HTTP.new( url.host, url.port, "localhost", 8081)
                 end
             rescue 
                 puts "Erro ao criar conexão"
@@ -55,7 +55,7 @@ class Unicap
             header.each do |value|
                 request[value[0]] = value[1]
             end
-            response = Net::HTTP.start(url.hostname, url.port,"localhost",8080) {|http|
+            response = Net::HTTP.start(url.hostname, url.port,"localhost",8081) {|http|
                 http.request(request)
             }
         end
@@ -66,28 +66,13 @@ class Unicap
         url = "#{@url}/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         header = {
             "Cookie" => @cookie, 
-            "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php",
-            "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0",
-            "Accept" => "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language" => "pt-BR,pt;q=0.8,en-US;q=0.5,en;q=0.3",
-            "Accept-Encoding" => "Accept-Encoding: gzip, deflate"
-
+            "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         }
         response = request(url,"","get",header)
+        page = Nokogiri::HTML(response.body) 
         binding.pry
     end
 end
 
 session = Unicap.new("2015204740","196722")
-# data = {"nomepessoa2" => "RAMON+RANIERI+ALVES+ALCANTARA", "codigointeiro2" => "2015204740", "codigoreduzido2" => "2015204740", "flag" => "index.php"}
-# header = {
-#     "Cookie" => session.cookie,
-#     "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/php/login_usu.php?flag=index.php",
-#     "Host" => "www.unicap.br",
-#     "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0",
-#     "Accept" => "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-#     "Accept-Language" => "pt-BR,pt;q=0.8,en-US;q=0.5,en;q=0.3",
-#     "Accept-Encoding" => "gzip, deflate"
-# }
-# r = session.request("#{session.url}/pergamum3/Pergamum/biblioteca_s/php/sessao.php",data,"get",header)
 binding.pry
