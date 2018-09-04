@@ -12,6 +12,11 @@ class Unicap
         data = {"flag" => "index.php", "login" => login, "password" => senha, "button" => "Acessar"}
         response = request("#{@url}/pergamum3/Pergamum/biblioteca_s/php/login_usu.php",data,"post",nil)
         @cookie = response['set-cookie']
+        location = response['location']
+
+        header = {"Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/php/login_usu.php?flag=index.php","Cookie" => @cookie}
+        response = request("#{@url}/pergamum3/Pergamum/biblioteca_s/php/#{location}","","get",header)
+        binding.pry
     end
 
     def request(uri, data,method,header)
