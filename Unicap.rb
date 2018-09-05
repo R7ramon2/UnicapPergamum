@@ -35,7 +35,7 @@ class Unicap
         else
             begin
                 if not defined?@http
-                    @http = Net::HTTP.new( url.host, url.port, "localhost", 8081)
+                    @http = Net::HTTP.new( url.host, url.port)
                 end
             rescue 
                 puts "Erro ao criar conexão"
@@ -55,24 +55,39 @@ class Unicap
             header.each do |value|
                 request[value[0]] = value[1]
             end
-            response = Net::HTTP.start(url.hostname, url.port,"localhost",8081) {|http|
+            response = Net::HTTP.start(url.hostname, url.port) {|http|
                 http.request(request)
             }
         end
         return response
     end
 
-    def get_livros()
+    def get_all_cod_livros()
         url = "#{@url}/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         header = {
             "Cookie" => @cookie, 
             "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         }
         response = request(url,"","get",header)
-        page = Nokogiri::HTML(response.body) 
-        binding.pry
+        codigos_livros_aux = ((response.body).gsub(/[^0-9]/," "))
+        codigos_livros = Array.new()
+        codigos_livros_aux.split(" ").each do |value|
+            if value.size == 8
+                codigos_livros.push(value)
+            end
+        end
+
+        codigos_livros = codigos_livros.uniq
+        if codigos_livros.size > 2
+            codigos_livros.delete_at(0)
+            codigos_livros.delete_at(1)
+        end
+        return codigos_livros
     end
 end
 
 session = Unicap.new("2015204740","196722")
-binding.pry
+a = session.get_all_cod_livros
+a.each do |value|
+    puts value
+end
