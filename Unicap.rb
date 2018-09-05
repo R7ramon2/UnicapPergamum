@@ -1,7 +1,6 @@
 require 'net/http'
 require 'json'
 require 'pry'
-require 'nokogiri'
 
 class Unicap
     attr_accessor :url
@@ -35,7 +34,7 @@ class Unicap
         else
             begin
                 if not defined?@http
-                    @http = Net::HTTP.new( url.host, url.port)
+                    @http = Net::HTTP.new( url.host, url.port,"localhost",8081)
                 end
             rescue 
                 puts "Erro ao criar conexão"
@@ -84,10 +83,30 @@ class Unicap
         end
         return codigos_livros
     end
+
+    def renova_livro_by_cod(cod_livro,matricula)
+        url = "#{@url}/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
+        header = {
+            "Cookie" => @cookie, 
+            "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
+        }
+        data = ""
+        selecs = ""
+        cod_livro.each do |value|
+            selecs+="#{value}@#1@#1;"
+            data = {
+                "renova" => "renovar",
+                "Selecs" => selecs,
+                "acao"   => "clicou",
+                "codigoreduzido_anterior" => matricula,
+                "todos"  => "on"
+            }
+        end
+        data = data.uniq
+        response = request(url,data,"post",header)
+    end
 end
 
 session = Unicap.new("2015204740","196722")
-a = session.get_all_cod_livros
-a.each do |value|
-    puts value
-end
+livros = session.get_all_cod_livros
+session.renova_livro_by_cod(livros,"2015204740")
