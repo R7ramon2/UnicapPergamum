@@ -1,3 +1,5 @@
+
+
 require 'net/http'
 require 'json'
 require 'pry'
@@ -68,21 +70,9 @@ class Unicap
             "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         }
         response = request(url,"","get",header)
-        codigos_livros_aux = ((response.body).gsub(/[^0-9]/," "))
-        codigos_livros = Array.new()
-        codigos_livros_aux.split(" ").each do |value|
-            if value.size == 8
-                codigos_livros.push(value)
-            end
-        end
-        codigos_livros = codigos_livros.uniq
-        if codigos_livros.size > 2
-            codigos_livros.delete_at(0)
-            codigos_livros.delete_at(0)
-        else
-            cod_livro = ""
-        end
-        return codigos_livros
+        codigos_livros_aux = response.body.scan(/class="box_write_left">[0-9]{8}/)
+        codigos_livros_aux.select {|value| value.gsub!("class=\"box_write_left\">","") }
+        return codigos_livros_aux
     end
 
     def renova_livro_by_cod(cod_livro,matricula)
@@ -108,8 +98,8 @@ class Unicap
     end
 end
 
-matricula = ""
-senha = ""
+matricula = "2015204740"
+senha = "196722"
 session = Unicap.new(matricula,senha)
 livros = session.get_all_cod_livros
 binding.pry
