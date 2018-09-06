@@ -34,7 +34,7 @@ class Unicap
         else
             begin
                 if not defined?@http
-                    @http = Net::HTTP.new( url.host, url.port,"localhost",8081)
+                    @http = Net::HTTP.new( url.host, url.port)
                 end
             rescue 
                 puts "Erro ao criar conexão"
@@ -75,11 +75,12 @@ class Unicap
                 codigos_livros.push(value)
             end
         end
-
         codigos_livros = codigos_livros.uniq
         if codigos_livros.size > 2
             codigos_livros.delete_at(0)
-            codigos_livros.delete_at(1)
+            codigos_livros.delete_at(0)
+        else
+            cod_livro = ""
         end
         return codigos_livros
     end
@@ -107,6 +108,7 @@ class Unicap
     end
 end
 
-session = Unicap.new("2015204740","196722")
+session = Unicap.new("2015250510","637724")
 livros = session.get_all_cod_livros
-session.renova_livro_by_cod(livros,"2015204740")
+binding.pry
+session.renova_livro_by_cod(livros,"2015250510")
