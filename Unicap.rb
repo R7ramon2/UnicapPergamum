@@ -108,7 +108,9 @@ class Unicap
     end
 end
 
-session = Unicap.new("2015250510","637724")
+matricula = ""
+senha = ""
+session = Unicap.new(matricula,senha)
 livros = session.get_all_cod_livros
 binding.pry
-session.renova_livro_by_cod(livros,"2015250510")
+session.renova_livro_by_cod(livros,matricula)
