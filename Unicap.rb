@@ -3,6 +3,8 @@
 require 'net/http'
 require 'json'
 require 'pry'
+require 'socket'
+
 
 class Unicap
     attr_accessor :url
@@ -75,6 +77,24 @@ class Unicap
         return codigos_livros_aux
     end
 
+    def get_all_cod_name_livros()
+        url = "#{@url}/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
+        header = {
+            "Cookie" => @cookie, 
+            "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
+        }
+        response = request(url,"","get",header)
+        cod_livros = get_all_cod_livros
+        livros = response.body.scan(/class="box_azul_left">.*/)
+        livros.select {|value| value.gsub!("class=\"box_azul_left\">","").gsub!(/ - <i>.*/,"") }
+        livros.delete_at(0)
+        cod_and_livros = Hash.new
+        livros.each_with_index do |value, index|
+            cod_and_livros[cod_livros[index]] = value
+        end
+        return cod_and_livros
+    end
+
     def renova_livro_by_cod(cod_livro,matricula)
         url = "#{@url}/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         header = {
@@ -98,9 +118,51 @@ class Unicap
     end
 end
 
-matricula = "2015204740"
-senha = "196722"
+
+
+# server = TCPServer.new('localhost', 2345)
+
+# # loop infinitely, processing one incoming
+# # connection at a time.
+# loop do
+
+#   # Wait until a client connects, then return a TCPSocket
+#   # that can be used in a similar fashion to other Ruby
+#   # I/O objects. (In fact, TCPSocket is a subclass of IO.)
+#   socket = server.accept
+
+#   # Read the first line of the request (the Request-Line)
+#   request = socket.gets
+
+#   # Log the request to the console for debugging
+#   STDERR.puts request
+
+#   response = "Hello World!\n"
+
+#   # We need to include the Content-Type and Content-Length headers
+#   # to let the client know the size and type of data
+#   # contained in the response. Note that HTTP is whitespace
+#   # sensitive, and expects each header line to end with CRLF (i.e. "\r\n")
+#   socket.print "HTTP/1.1 200 OK\r\n" +
+#                "Content-Type: text/plain\r\n" +
+#                "Content-Length: #{response.bytesize}\r\n" +
+#                "Connection: close\r\n"
+
+#   # Print a blank line to separate the header from the response body,
+#   # as required by the protocol.
+#   socket.print "\r\n"
+
+#   # Print the actual response body, which is just "Hello World!\n"
+#   socket.print response
+
+#   # Close the socket, terminating the connection
+#   socket.close
+# end
+
+matricula = ""
+senha = ""
 session = Unicap.new(matricula,senha)
-livros = session.get_all_cod_livros
+session.get_all_cod_name_livros
 binding.pry
+livros = session.get_all_cod_livros
 session.renova_livro_by_cod(livros,matricula)
