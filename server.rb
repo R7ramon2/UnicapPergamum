@@ -15,7 +15,9 @@ require 'pp'
 require 'pry'
 require 'json'
 
-data = {"matricula" => "2015204740", "password" => "196722"}
+matricula = ""
+senha = ""
+data = {"matricula" => matricula, "password" => senha}
 
 server = Net::HTTP::Server.run(:port => 8000) do |request,stream|
   pp request
