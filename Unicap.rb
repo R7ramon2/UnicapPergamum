@@ -50,17 +50,6 @@ class Unicap
             request.set_form_data(data)
             response = @http.request( request )
         elsif method.upcase == "GET"
-            # if data != ""
-            #     url.query = URI.encode_www1_form(data)
-            # end
-            # request = Net::HTTP::Get.new(url)
-            # binding.pry
-            # header.each do |value|
-            #     request[value[0]] = value[1]
-            # end
-            # response = Net::HTTP.start(url.hostname, url.port) {|http|
-            #     http.request(request)
-            # }
             if data != ""
                 url.query = URI.encode_www_form(data)
             end
