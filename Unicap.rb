@@ -1,4 +1,5 @@
 require 'net/http'
+require 'net/https'
 require 'json'
 require 'pry'
 require 'socket'
@@ -9,14 +10,14 @@ class Unicap
     attr_reader :cookie
     def initialize(login,senha)
         if not defined?@url
-            @url = "http://www.unicap.br/"
+            @url = "https://www1.unicap.br/"
         end
-        data = {"flag" => "index.php", "login" => login, "password" => senha, "button" => "Acessar"}
+        data = {"flag" => "index.php", "login" => login, "password" => senha, "button" => "Access"}
         response = request("#{@url}/pergamum3/Pergamum/biblioteca_s/php/login_usu.php",data,"post",nil)
         @cookie = response['set-cookie']
         location = response['location']
 
-        header = {"Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/php/login_usu.php?flag=index.php","Cookie" => @cookie}
+        header = {"Referer" => "https://www1.unicap.br/pergamum3/Pergamum/biblioteca_s/php/login_usu.php?flag=index.php","Cookie" => @cookie}
         response = request("#{@url}/pergamum3/Pergamum/biblioteca_s/php/#{location}","","get",header)
     end
 
@@ -49,16 +50,26 @@ class Unicap
             request.set_form_data(data)
             response = @http.request( request )
         elsif method.upcase == "GET"
+            # if data != ""
+            #     url.query = URI.encode_www1_form(data)
+            # end
+            # request = Net::HTTP::Get.new(url)
+            # binding.pry
+            # header.each do |value|
+            #     request[value[0]] = value[1]
+            # end
+            # response = Net::HTTP.start(url.hostname, url.port) {|http|
+            #     http.request(request)
+            # }
             if data != ""
                 url.query = URI.encode_www_form(data)
             end
-            request = Net::HTTP::Get.new(url)
-            header.each do |value|
-                request[value[0]] = value[1]
-            end
-            response = Net::HTTP.start(url.hostname, url.port) {|http|
-                http.request(request)
-            }
+            request = Net::HTTP::Get.new( url )
+            request['Cookie'] = @cookie
+            request['User-Agent'] = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0"
+            request['Accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            request['Referer'] = header['Referer']
+            response = @http.request(request)
         end
         return response
     end
@@ -67,7 +78,7 @@ class Unicap
         url = "#{@url}/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         header = {
             "Cookie" => @cookie, 
-            "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
+            "Referer" => "https://www1.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         }
         response = request(url,"","get",header)
         codigos_livros_aux = response.body.scan(/class="box_write_left">[0-9]{8}/)
@@ -79,7 +90,7 @@ class Unicap
         url = "#{@url}/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         header = {
             "Cookie" => @cookie, 
-            "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
+            "Referer" => "https://www1.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         }
         response = request(url,"","get",header)
         cod_livros = get_all_cod_livros
@@ -100,11 +111,10 @@ class Unicap
         url = "#{@url}/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         header = {
             "Cookie" => @cookie, 
-            "Referer" => "http://www.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
+            "Referer" => "https://www1.unicap.br/pergamum3/Pergamum/biblioteca_s/meu_pergamum/emp_renovacao.php"
         }
         data = ""
         selecs = ""
-        binding.pry
         cod_livro.each do |value|
             selecs+="#{value}@#1@#1;"
             data = {
@@ -121,8 +131,8 @@ class Unicap
 end
 
 
-matricula = ""
-senha = ""
+matricula = "2015180344"
+senha = "146404"
 session = Unicap.new(matricula,senha)
 cod_livros = session.get_all_cod_name_livros
 binding.pry
