@@ -120,8 +120,8 @@ class Unicap
 end
 
 
-matricula = "2015180344"
-senha = "146404"
+matricula = ""
+senha = ""
 session = Unicap.new(matricula,senha)
 cod_livros = session.get_all_cod_name_livros
 binding.pry
